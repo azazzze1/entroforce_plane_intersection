@@ -6,7 +6,7 @@ Makefile
 *.o
 *.so
 *.dylib
-intersection          # ваш исполняемый файл
+intersection
 
 venv/
 env/
