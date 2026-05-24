@@ -1,0 +1,24 @@
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.o
+*.so
+*.dylib
+intersection          # ваш исполняемый файл
+
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+
+mesh.txt
+triangulation.txt
+filtered_triangulation.txt
+vizualization.py
+*.png
+*.svg
+*.log
