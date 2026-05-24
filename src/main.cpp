@@ -22,10 +22,6 @@ int main()
 
     MeshGraph graph(*cdt, mesh);
 
-    std::cout << "✅ Граф построен.\n";
-    std::cout << "   Валидных граней: " << graph.faces.size() << "\n";
-    std::cout << "   Уникальных ребер: " << graph.edges.size() << "\n";
-
     file.close();
 
     return 0;
