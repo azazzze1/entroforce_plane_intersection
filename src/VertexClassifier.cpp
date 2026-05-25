@@ -2,7 +2,11 @@
 
 
 std::pair<double, double> VertexClassifier::interpolate(const Point3D& v0, const Point3D& v1, double height){
-    double t = (height - v0.z) / (v1.z - v0.z);
+    double diff = v1.z - v0.z;
+    if (std::abs(diff) < 1e-12){
+        return {(v0.x + v1.x) / 2, (v0.y + v1.y) / 2};
+    }
+    double t = (height - v0.z) / diff;
     return {v0.x + t * (v1.x - v0.x), v0.y + t * (v1.y - v0.y)};
 }
 
@@ -22,16 +26,16 @@ std::vector<Segment2D> VertexClassifier::extractSegments(const MeshGraph& graph,
         VertexState s[3] = {states[f.v0], states[f.v1], states[f.v2]};
         const Point3D* v[3] = {&graph.vertices[f.v0], &graph.vertices[f.v1], &graph.vertices[f.v2]};
 
-        int belowCount = 0, aboveCount = 0, onCout = 0;
+        int belowCount = 0, aboveCount = 0, onCount = 0;
         for (int i = 0; i < 3; ++i) {
             if (s[i] == VertexState::BELOW) ++belowCount;
             else if (s[i] == VertexState::ABOVE) ++aboveCount;
-            else ++onCout;
+            else ++onCount;
         }
 
         if (belowCount == 3 || aboveCount == 3) continue;
 
-        if (onCout == 2) {
+        if (onCount == 2) {
             if (s[0] == VertexState::ON && s[1] == VertexState::ON) 
                 segments.push_back({v[0]->x, v[0]->y, v[1]->x, v[1]->y});
             
@@ -42,7 +46,7 @@ std::vector<Segment2D> VertexClassifier::extractSegments(const MeshGraph& graph,
                 segments.push_back({v[1]->x, v[1]->y, v[2]->x, v[2]->y});
         }
 
-        if (onCout == 1 && belowCount == 1 && aboveCount == 1) {
+        if (onCount == 1 && belowCount == 1 && aboveCount == 1) {
             int onIdx = -1, belowIdx = -1, aboveIdx = -1;
             for (int i = 0; i < 3; ++i) {
                 if (s[i] == VertexState::ON) onIdx = i;
@@ -53,14 +57,19 @@ std::vector<Segment2D> VertexClassifier::extractSegments(const MeshGraph& graph,
             segments.push_back({v[onIdx]->x, v[onIdx]->y, ix, iy});
         }
 
-        if (onCout == 0) {
-            int belowIDX = (s[0] == VertexState::BELOW ? 0 : (s[1] == VertexState::BELOW ? 1 : 2));
-
-            int e0 = (belowIDX + 1) % 3;
-            int e1 = (belowIDX + 2) % 3;
-            
-            auto [x1, y1] = interpolate(*v[belowIDX], *v[e0], height);
-            auto [x2, y2] = interpolate(*v[belowIDX], *v[e1], height);
+         if (onCount == 0) {
+            int singleIDX = -1;
+            for (int i = 0; i < 3; ++i) {
+                if ((belowCount == 1 && s[i] == VertexState::BELOW) ||
+                    (aboveCount == 1 && s[i] == VertexState::ABOVE)) {
+                    singleIDX = i;
+                    break;
+                }
+            }
+            int e0 = (singleIDX + 1) % 3;
+            int e1 = (singleIDX + 2) % 3;
+            auto [x1, y1] = interpolate(*v[singleIDX], *v[e0], height);
+            auto [x2, y2] = interpolate(*v[singleIDX], *v[e1], height);
             segments.push_back({x1, y1, x2, y2});
         }
     }

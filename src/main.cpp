@@ -24,6 +24,7 @@ int main()
     MeshGraph graph(*cdt, mesh);
 
     graph.exportGraphToTXT("../meshGenerator/filtered_triangulation.txt");
+    
 
     double cut_height = 2.5; 
     auto segments = VertexClassifier::extractSegments(graph, cut_height);
