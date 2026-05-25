@@ -22,6 +22,8 @@ int main()
 
     MeshGraph graph(*cdt, mesh);
 
+    graph.exportGraphToTXT("../meshGenerator/filtered_triangulation.txt");
+
     file.close();
 
     return 0;

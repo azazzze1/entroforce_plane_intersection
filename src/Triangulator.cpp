@@ -18,34 +18,28 @@ std::unique_ptr<CDT> Triangulator::triangulate(const ParsedMesh& mesh) const {
 
     cdt->insert(infoPoints.begin(), infoPoints.end());
 
-    std::vector<VertexHandle> handleID(mesh.points.size());
-    for(auto vit = cdt->finite_vertices_begin(); vit != cdt->finite_vertices_end(); ++vit) {
-        handleID[vit->info().original_id] = vit;
-    }
-
-    std::set<std::pair<int, int>> uniqueEdges;
-    for(const auto& poly : mesh.polygons) {
-        if (poly.vertexIDX.size() < 2) continue;
-
-        for (size_t i = 0; i < poly.vertexIDX.size(); ++i) {
-            int u = poly.vertexIDX[i];
-            int v = poly.vertexIDX[(i + 1) % poly.vertexIDX.size()];
-
-            if (u < 0 || u >= static_cast<int>(mesh.points.size()) || 
-                v < 0 || v >= static_cast<int>(mesh.points.size())) {
-                throw std::runtime_error("Triangulator: Invalid polygon vertex index");
-            }
-            
-            if (u == v) continue;
-
-            if (u > v) uniqueEdges.emplace(v, u);
-            else uniqueEdges.emplace(u, v);
+    for (const auto& poly : mesh.polygons) {
+        if (poly.vertexIDX.size() < 3) continue;
+        
+        std::vector<Point2> contour;
+        contour.reserve(poly.vertexIDX.size());
+        for (int idx : poly.vertexIDX) {
+            contour.emplace_back(mesh.points[idx].x, mesh.points[idx].y);
         }
+
+        cdt->insert_constraint(contour.begin(), contour.end(), true);
     }
 
-    for (const auto& [u, v] : uniqueEdges) {
-        cdt->insert_constraint(handleID[u], handleID[v]);
+    CGAL::mark_domain_in_triangulation(*cdt, InDomainMap());
+
+    std::vector<CDT::Face_handle> to_delete;
+    for (auto f = cdt->finite_faces_begin(); f != cdt->finite_faces_end(); ++f)
+    {
+        if (!f->info())
+            to_delete.push_back(f);
     }
+    for (auto f : to_delete)
+        cdt->delete_face(f);
 
     return cdt;
 }

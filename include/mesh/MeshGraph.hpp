@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
+#include <queue>
 
 class MeshGraph{
 public:
@@ -17,11 +18,12 @@ public:
     std::vector<Edge> edges;
     
     MeshGraph(const CDT& cdt, const ParsedMesh& originalData);
+    bool exportGraphToTXT(const std::string& filename) const;
+
 
 private: 
     bool isPointInsidePolygon(double px, double py, const std::vector<int>& polyIDX, const std::vector<Point3D>& points);
-
-    
+ 
 };
 
 #endif
