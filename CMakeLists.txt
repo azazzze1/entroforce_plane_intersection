@@ -8,7 +8,7 @@ cmake_policy(SET CMP0167 NEW)
 
 find_package(CGAL REQUIRED COMPONENTS Core)
 
-add_executable(intersection src/main.cpp src/MeshLoader.cpp src/Triangulator.cpp src/MeshGraph.cpp)
+add_executable(intersection src/main.cpp src/MeshLoader.cpp src/Triangulator.cpp src/MeshGraph.cpp src/VertexClassifier.cpp)
 
 target_include_directories(intersection PRIVATE ${CMAKE_SOURCE_DIR}/include)
 

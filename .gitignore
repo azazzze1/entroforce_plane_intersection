@@ -6,7 +6,6 @@ Makefile
 *.o
 *.so
 *.dylib
-intersection
 
 venv/
 env/
@@ -19,6 +18,7 @@ mesh.txt
 triangulation.txt
 filtered_triangulation.txt
 vizualization.py
+contours.txt
 *.png
 *.svg
 *.log
