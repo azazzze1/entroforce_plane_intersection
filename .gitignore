@@ -13,14 +13,3 @@ __pycache__/
 *.pyc
 *.pyo
 .python-version
-
-mesh.txt
-triangulation.txt
-filtered_triangulation.txt
-vizualization.py
-contours.txt
-contours_final.txt
-vizualizator.py
-*.png
-*.svg
-*.log

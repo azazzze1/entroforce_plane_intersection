@@ -5,23 +5,7 @@
 #include "dataIO/Types.hpp"
 #include "mesh/MeshGraph.hpp"
 #include <unordered_map>
-#include <cmath>
 #include <algorithm>
-
-struct EdgeKey {
-    int v0, v1;
-    bool operator==(const EdgeKey& o) const {
-        return (v0 == o.v0 && v1 == o.v1) || (v0 == o.v1 && v1 == o.v0);
-    }
-};
-
-struct EdgeKeyHash {
-    size_t operator()(const EdgeKey& e) const {
-        int a = std::min(e.v0, e.v1);
-        int b = std::max(e.v0, e.v1);
-        return std::hash<int>{}(a) ^ (std::hash<int>{}(b) << 1);
-    }
-};
 
 class VertexClassifier {
 private:
