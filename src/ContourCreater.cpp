@@ -1,10 +1,4 @@
-// ContourCreater.cpp
-#include "intersection/ContourCreater.hpp"
-#include <unordered_map>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <cassert>
+#include "intersection/ContourCreater.hpp"                                              
 
 using namespace std;
 
@@ -25,15 +19,12 @@ double ContourCreater::projectOnEdge(double px, double py, double ax, double ay,
     return max(0.0, min(1.0, t));
 }
 
-void ContourCreater::addBoundarySegments(const ParsedMesh& mesh,
-                                         const vector<Segment2D>& interiorSegments,
-                                         vector<Segment2D>& allSegments) {
-    for (size_t p = 0; p < mesh.polygons.size(); ++p) {
+void ContourCreater::addBoundarySegments(const ParsedMesh& mesh, const vector<Segment2D>& interiorSegments, vector<Segment2D>& allSegments) {
+    for (int p = 0; p < mesh.polygons.size(); ++p) {
         auto poly = mesh.polygons[p];
-        // Ориентация полигона: внешний (p==0) — CCW, дырки — CW
         double area = 0.0;
-        for (size_t i = 0; i < poly.vertexIDX.size(); ++i) {
-            size_t j = (i + 1) % poly.vertexIDX.size();
+        for (int i = 0; i < poly.vertexIDX.size(); ++i) {
+            int j = (i + 1) % poly.vertexIDX.size();
             const auto& a = mesh.points[poly.vertexIDX[i]];
             const auto& b = mesh.points[poly.vertexIDX[j]];
             area += a.x * b.y - b.x * a.y;
@@ -41,19 +32,17 @@ void ContourCreater::addBoundarySegments(const ParsedMesh& mesh,
         bool isOuter = (p == 0);
         if ((isOuter && area < 0) || (!isOuter && area > 0)) {
             reverse(poly.vertexIDX.begin(), poly.vertexIDX.end());
-            area = -area; // теперь знак соответствует нужному
+            area = -area;
         }
 
-        // Для каждого ребра полигона
-        for (size_t i = 0; i < poly.vertexIDX.size(); ++i) {
-            size_t j = (i + 1) % poly.vertexIDX.size();
+        for (int i = 0; i < poly.vertexIDX.size(); ++i) {
+            int j = (i + 1) % poly.vertexIDX.size();
             int u = poly.vertexIDX[i];
             int v = poly.vertexIDX[j];
             const auto& pu = mesh.points[u];
             const auto& pv = mesh.points[v];
 
-            // Собираем точки на этом ребре: начало, конец и точки из interiorSegments
-            vector<pair<double, pair<double, double>>> points; // t, (x,y)
+            vector<pair<double, pair<double, double>>> points;
             points.emplace_back(0.0, make_pair(pu.x, pu.y));
             points.emplace_back(1.0, make_pair(pv.x, pv.y));
 
@@ -68,18 +57,17 @@ void ContourCreater::addBoundarySegments(const ParsedMesh& mesh,
                 }
             }
 
-            // Сортировка по t и удаление близких точек
             sort(points.begin(), points.end(),
                  [](const auto& a, const auto& b) { return a.first < b.first; });
             vector<pair<double, pair<double, double>>> filtered;
-            for (size_t k = 0; k < points.size(); ++k) {
+
+            for (int k = 0; k < points.size(); ++k) {
                 if (k == 0 || points[k].first - filtered.back().first > 1e-6) {
                     filtered.push_back(points[k]);
                 }
             }
 
-            // Создаём граничные отрезки
-            for (size_t k = 0; k + 1 < filtered.size(); ++k) {
+            for (int k = 0; k + 1 < filtered.size(); ++k) {
                 double x0 = filtered[k].second.first, y0 = filtered[k].second.second;
                 double x1 = filtered[k+1].second.first, y1 = filtered[k+1].second.second;
                 if (hypot(x1 - x0, y1 - y0) > 1e-9) {
@@ -90,19 +78,13 @@ void ContourCreater::addBoundarySegments(const ParsedMesh& mesh,
     }
 }
 
-vector<vector<Point2D>> ContourCreater::create(
-    const vector<Segment2D>& interiorSegments,
-    const MeshGraph& graph,
-    const ParsedMesh& mesh,
-    double height) {
+vector<vector<Point2D>> ContourCreater::create(const vector<Segment2D>& interiorSegments, const MeshGraph& graph, const ParsedMesh& mesh, double height) {
 
-    // 1. Добавляем граничные отрезки с разбиением
     vector<Segment2D> allSegments = interiorSegments;
     addBoundarySegments(mesh, interiorSegments, allSegments);
 
     if (allSegments.empty()) return {};
 
-    // 2. Склеиваем близкие вершины и строим индекс
     unordered_map<PointKey, Point2D, PointKeyHash> pointMap;
     for (const auto& seg : allSegments) {
         PointKey k0{seg.x0, seg.y0};
@@ -122,12 +104,13 @@ vector<vector<Point2D>> ContourCreater::create(
 
     struct DirectedSegment {
         int startIdx, endIdx;
-        int originalIdx; // индекс в allSegments
+        int originalIdx; 
         bool used = false;
     };
+
     vector<DirectedSegment> dirSegs;
     dirSegs.reserve(allSegments.size());
-    for (size_t i = 0; i < allSegments.size(); ++i) {
+    for (int i = 0; i < allSegments.size(); ++i) {
         const auto& seg = allSegments[i];
         int s = pointToIndex.at(PointKey{seg.x0, seg.y0});
         int e = pointToIndex.at(PointKey{seg.x1, seg.y1});
@@ -136,16 +119,14 @@ vector<vector<Point2D>> ContourCreater::create(
         }
     }
 
-    // Списки исходящих рёбер для каждой вершины
     vector<vector<int>> outEdges(pts.size());
-    for (size_t i = 0; i < dirSegs.size(); ++i) {
+    for (int i = 0; i < dirSegs.size(); ++i) {
         outEdges[dirSegs[i].startIdx].push_back(static_cast<int>(i));
     }
 
-    // 4. Обход – выделение замкнутых ориентированных контуров
     vector<vector<Point2D>> contours;
 
-    for (size_t startIdx = 0; startIdx < dirSegs.size(); ++startIdx) {
+    for (int startIdx = 0; startIdx < dirSegs.size(); ++startIdx) {
         if (dirSegs[startIdx].used) continue;
 
         vector<int> vertSequence;
@@ -163,7 +144,7 @@ vector<vector<Point2D>> ContourCreater::create(
                     break;
                 }
             }
-            if (nextEdge == -1) break; // обрыв (не должно происходить)
+            if (nextEdge == -1) break; 
 
             dirSegs[nextEdge].used = true;
             int nextVert = dirSegs[nextEdge].endIdx;

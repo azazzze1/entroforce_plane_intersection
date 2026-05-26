@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 import numpy as np
 import sys
 from shapely.geometry import Polygon, Point
 from shapely import contains
 
 def generate_mesh(filename, n_target=50000):
-    print("Начало работы...")
-    
     theta = np.linspace(0, 2*np.pi, 80, endpoint=False)
     r = 15 + 4*np.cos(3*theta) + 2*np.sin(5*theta)
     outer_verts = np.column_stack([r*np.cos(theta), r*np.sin(theta)])

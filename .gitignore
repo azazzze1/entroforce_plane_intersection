@@ -20,6 +20,7 @@ filtered_triangulation.txt
 vizualization.py
 contours.txt
 contours_final.txt
+vizualizator.py
 *.png
 *.svg
 *.log

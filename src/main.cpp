@@ -24,7 +24,6 @@ int main() {
     double cut_height = 2.5;
     auto interiorSegments = VertexClassifier::extractSegments(graph, cut_height);
 
-    // Передаём в ContourCreater и внутренние отрезки, и параметры области
     auto contours = ContourCreater::create(interiorSegments, graph, mesh, cut_height);
 
     std::cout << "Найдено замкнутых контуров: " << contours.size() << "\n";
