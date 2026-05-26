@@ -1,6 +1,5 @@
 #include "intersection/VertexClassifier.hpp"
 
-
 std::pair<double, double> VertexClassifier::interpolate(const Point3D& v0, const Point3D& v1, double height){
     double diff = v1.z - v0.z;
     if (std::abs(diff) < 1e-12){
@@ -36,13 +35,13 @@ std::vector<Segment2D> VertexClassifier::extractSegments(const MeshGraph& graph,
         if (belowCount == 3 || aboveCount == 3) continue;
 
         if (onCount == 2) {
-            if (s[0] == VertexState::ON && s[1] == VertexState::ON) 
+            if (s[0] == VertexState::ON && s[1] == VertexState::ON && s[2] == VertexState::BELOW) 
                 segments.push_back({v[0]->x, v[0]->y, v[1]->x, v[1]->y});
             
-            else if (s[0] == VertexState::ON && s[2] == VertexState::ON) 
+            else if (s[0] == VertexState::ON && s[2] == VertexState::ON && s[1] == VertexState::BELOW) 
                 segments.push_back({v[0]->x, v[0]->y, v[2]->x, v[2]->y});
             
-            else 
+            else if (s[1] == VertexState::ON && s[2] == VertexState::ON && s[0] == VertexState::BELOW)
                 segments.push_back({v[1]->x, v[1]->y, v[2]->x, v[2]->y});
         }
 
