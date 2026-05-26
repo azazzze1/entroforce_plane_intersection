@@ -6,40 +6,33 @@
 #include "intersection/ContourCreater.hpp"
 #include <fstream>
 
-int main()
-{
+
+double snap(double v) { return std::round(v * 10000.0) / 10000.0; }
+
+int main() {    
     MeshLoader loader;
     Triangulator triang;
-
     std::string filename = "../meshGenerator/mesh.txt";
-
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Ошибка: не удалось открыть файл " << filename << "\n";
-        return 1;
-    }
-
+    if (!file.is_open()) { std::cerr << "Ошибка файла\n"; return 1; }
     ParsedMesh mesh = loader.load(file);
     file.close();
-
     auto cdt = triang.triangulate(mesh);
-
     MeshGraph graph(*cdt, mesh);
 
-    graph.exportGraphToTXT("../meshGenerator/filtered_triangulation.txt");
-    
     double cut_height = 2.5; 
     auto segments = VertexClassifier::extractSegments(graph, cut_height);
 
+  
     for (size_t p = 0; p < mesh.polygons.size(); ++p) {
-        const auto& poly = mesh.polygons[p];
+        const auto & poly = mesh.polygons[p];
         for (size_t i = 0; i < poly.vertexIDX.size(); ++i) {
             int u = poly.vertexIDX[i];
             int v = poly.vertexIDX[(i + 1) % poly.vertexIDX.size()];
             
             segments.push_back({
-                graph.vertices[u].x, graph.vertices[u].y,
-                graph.vertices[v].x, graph.vertices[v].y
+                 snap(graph.vertices[u].x), snap(graph.vertices[u].y),
+                 snap(graph.vertices[v].x), snap(graph.vertices[v].y)
             });
         }
     }

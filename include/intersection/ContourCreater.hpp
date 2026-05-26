@@ -14,12 +14,16 @@ struct PointKey {
     bool operator==(const PointKey& other) const {
         return std::hypot(x - other.x, y - other.y) < 1e-6;
     }
+    
+    bool operator<(const PointKey& other) const {
+        return x < other.x || (x == other.x && y < other.y);
+    }
 };
 
 struct PointKeyHash {
     size_t operator()(const PointKey& p) const {
-        long long ix = static_cast<long long>(std::round(p.x * 1e6));
-        long long iy = static_cast<long long>(std::round(p.y * 1e6));
+        long long ix = static_cast<long long>(std::round(p.x * 10000));
+        long long iy = static_cast<long long>(std::round(p.y * 10000));
         return std::hash<long long>{}(ix) ^ (std::hash<long long>{}(iy) << 1);
     }
 };
