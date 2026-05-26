@@ -16,6 +16,7 @@
 #include <algorithm>
 
 
+// Настройка CDT с учётом хранения информации в врешинах
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
 
 struct VertexInfo {
@@ -44,8 +45,15 @@ struct InDomainMap{
     friend void put(const InDomainMap&, key_type f, value_type v) { f->info() = v; }
 };
 
+// Класс для получения триангуляции с помощбю библиотеки CGAL
 class Triangulator {
 public:
+    /**
+     * Строит CDT по входным данным, помечает грани внутри домена и удаляет внешние.
+     * Вход:
+     *   mesh - входные данные (точки + ограничения)
+     * Выход: умный указатель на триангуляцию.
+     */
     std::unique_ptr<CDT> triangulate(const ParsedMesh& mesh) const;
 };
 

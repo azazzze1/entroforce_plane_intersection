@@ -11,19 +11,20 @@
 #include <cmath>
 #include <queue>
 
+// Класс для перевода CDT графа в граф, с которым можно работать через встроенные библиотеки 
 class MeshGraph{
 public:
     std::vector<Point3D> vertices;
     std::vector<Face> faces;
     std::vector<Edge> edges;
     
+    /**
+     * Конструктор: преобразует CDT и исходные данные в плоский граф
+     * Вход:
+     *   cdt - триангуляция CGAL
+     *   originalData - исходные точки и полигоны для восстановления индексов вершин
+     */
     MeshGraph(const CDT& cdt, const ParsedMesh& originalData);
-    bool exportGraphToTXT(const std::string& filename) const;
-
-
-private: 
-    bool isPointInsidePolygon(double px, double py, const std::vector<int>& polyIDX, const std::vector<Point3D>& points);
- 
 };
 
 #endif
